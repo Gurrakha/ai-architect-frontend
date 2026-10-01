@@ -58,40 +58,11 @@ before shipping this:
    cleared storage. If a real list endpoint is added, swap this out for a
    direct query in `app/page.tsx`.
 
-2. **SSE only reports coarse status.** `events.py` / `orchestrator.py` only
-   ever publish `status` (`PENDING`/`RUNNING`/`WAITING_FOR_INPUT`/
-   `COMPLETED`/`FAILED`), `clarification_required`, `completed`, and
-   `failed` — never which LangGraph node is currently executing, and never
-   artifact content. The generation progress page (`lib/pipeline-stages.ts`)
-   compensates by treating "does `GET .../latest` return content yet" as a
-   proxy for per-stage completion, which is honest (it's real data) but is
-   an inference, not a literal read of graph state. If the backend adds
-   per-node SSE events, wire those in directly instead.
+2. **SSE reports per artifact status - completed/running/failed**.
 
-3. **Clarification answers are submitted one at a time, and the first one
-   resumes the whole run.** See `graph.py::wait_for_clarifications` +
-   the `answer_clarification` route: `wait_for_clarifications` does a
-   single `interrupt()` expecting *all* answers, but the route calls
-   `orchestrator.resume` on every single `POST
-   .../clarifications/{clarification_id}` call with just that one answer.
-   In practice, the first clarification answered resumes the graph past
-   `clarification_wait`, whether or not the other questions have been
-   answered yet. `components/generation/clarification-panel.tsx` collects
-   every answer and submits them in question order to get as close as
-   possible to "answer all, then continue," but this is a real backend
-   ordering issue, not something the frontend can fully paper over. If
-   this matters, the fix belongs in `answer_clarification` /
-   `wait_for_clarifications` (e.g. only resume once every clarification
-   for the generation has an answer).
+3. **Clarification answers are submitted all at once**.
 
-4. **`GenerationCreate.workflow` / `.model` have no declared enum.**
-   `openapi.json` requires both as free-form strings with no listed valid
-   values, and the graph always builds the same single pipeline regardless
-   of `workflow`, while `model` is persisted but never actually passed to
-   `GeminiProvider()`. The "start generation" dialog exposes both as
-   editable text inputs with placeholder defaults
-   (`full_pipeline` / `gemini-1.5-pro`) rather than hiding them, since the
-   contract doesn't say what's actually valid.
+4. **`GenerationCreate.workflow` has no declared enum.** `openapi.json` exposes `workflow` as a free-form string, while the current backend runs the same full generation pipeline regardless of the workflow value. The frontend therefore keeps the workflow field editable, with `full_pipeline` as the default. The Gemini model is no longer selected by the frontend; the backend uses its server-side `GEMINI_MODEL` configuration.
 
 5. **`getLatestOrNull` treats any 404 from a `.../latest` endpoint as "not
    generated yet."** The 404 response isn't documented in `openapi.json`
