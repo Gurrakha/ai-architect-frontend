@@ -239,7 +239,7 @@ export type GenerationStatus =
 
 export interface GenerationCreate {
   workflow: string;
-  model: string;
+  // model?: string;
 }
 
 export interface GenerationResponse {

@@ -18,30 +18,20 @@ import {
 import { ErrorState } from "@/components/shared/error-state";
 import { useCreateGeneration } from "@/lib/hooks/use-generation";
 
-/**
- * `GenerationCreate` requires `workflow` and `model` strings, but
- * openapi.json doesn't declare an enum of valid values for either, and
- * the graph implementation always builds the same single pipeline and
- * always constructs `GeminiProvider()` with no arguments (i.e. `model`
- * is currently persisted but not actually used to pick a provider). The
- * defaults below are a reasonable placeholder, exposed as editable
- * fields rather than hidden, since the contract doesn't tell us what's
- * actually valid here.
- */
 const DEFAULT_WORKFLOW = "full_pipeline";
-const DEFAULT_MODEL = "gemini-1.5-pro";
+// const DEFAULT_MODEL = "gemini-1.5-pro";
 
 export function StartGenerationDialog({ projectId }: { projectId: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [workflow, setWorkflow] = useState(DEFAULT_WORKFLOW);
-  const [model, setModel] = useState(DEFAULT_MODEL);
+  // const [model, setModel] = useState(DEFAULT_MODEL);
   const mutation = useCreateGeneration(projectId);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     mutation.mutate(
-      { workflow: workflow.trim(), model: model.trim() },
+      { workflow: workflow.trim()},
       {
         onSuccess: (generation) => {
           setOpen(false);
@@ -78,7 +68,7 @@ export function StartGenerationDialog({ projectId }: { projectId: number }) {
               required
             />
           </div>
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="model">Model</Label>
             <Input
               id="model"
@@ -87,7 +77,7 @@ export function StartGenerationDialog({ projectId }: { projectId: number }) {
               maxLength={100}
               required
             />
-          </div>
+          </div> */}
           {mutation.isError && <ErrorState error={mutation.error} />}
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
