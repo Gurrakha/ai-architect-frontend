@@ -4,6 +4,15 @@ Next.js 15 (App Router) + TypeScript + Tailwind + shadcn-style components +
 TanStack Query + React Flow, wired directly to the `openapi.json` contract
 provided for the AI Architect backend.
 
+## Live Project
+Live Application:
+ https://ai-architect-frontend.vercel.app/
+
+Backend API Documentation:
+ https://ai-architect-backend-0wnf.onrender.com/docs
+
+---
+
 ## Setup
 
 ```bash
